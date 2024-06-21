@@ -10,6 +10,13 @@ import { UserDto } from './user.dto'
 export class UsersService {
 	constructor(private prisma: PrismaService) {}
 
+	private handleError(error: any, message: string) {
+		if (error instanceof NotFoundException) {
+			throw error
+		}
+		throw new InternalServerErrorException(message)
+	}
+
 	async findOne(id: number) {
 		try {
 			const user = await this.prisma.users.findUnique({
@@ -20,12 +27,7 @@ export class UsersService {
 
 			return user
 		} catch (error) {
-			if (error instanceof NotFoundException) {
-				throw error
-			}
-			throw new InternalServerErrorException(
-				'An error occurred while fetching the user'
-			)
+			this.handleError(error, 'An error occurred while fetching the user')
 		}
 	}
 
@@ -33,9 +35,7 @@ export class UsersService {
 		try {
 			return await this.prisma.users.findMany()
 		} catch (error) {
-			throw new InternalServerErrorException(
-				'An error occurred while fetching users'
-			)
+			this.handleError(error, 'An error occurred while fetching users')
 		}
 	}
 
@@ -46,9 +46,7 @@ export class UsersService {
 
 			return await this.prisma.users.create({ data: { userId, ...dto } })
 		} catch (error) {
-			throw new InternalServerErrorException(
-				'An error occurred while creating the user'
-			)
+			this.handleError(error, 'An error occurred while creating the user')
 		}
 	}
 
@@ -65,12 +63,7 @@ export class UsersService {
 				data: dto,
 			})
 		} catch (error) {
-			if (error instanceof NotFoundException) {
-				throw error
-			}
-			throw new InternalServerErrorException(
-				'An error occurred while updating the user'
-			)
+			this.handleError(error, 'An error occurred while updating the user')
 		}
 	}
 
@@ -86,12 +79,7 @@ export class UsersService {
 				where: { userId: id },
 			})
 		} catch (error) {
-			if (error instanceof NotFoundException) {
-				throw error
-			}
-			throw new InternalServerErrorException(
-				'An error occurred while deleting the user'
-			)
+			this.handleError(error, 'An error occurred while deleting the user')
 		}
 	}
 }
